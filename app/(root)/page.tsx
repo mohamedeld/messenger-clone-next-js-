@@ -1,3 +1,4 @@
+import AuthForm from "@/app/(root)/components/AuthForm";
 import Image from "next/image";
 
 export default function Home() {
@@ -11,7 +12,9 @@ export default function Home() {
           className="mx-auto w-auto"
           alt="messenger logo"
         />
+        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">Sign in to your account</h2>
       </div>
+      <AuthForm/>
     </div>
   );
 }
