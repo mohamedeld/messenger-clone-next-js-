@@ -5,6 +5,8 @@ import Input from '../../../components/inputs/Input';
 import Button from '@/components/Button';
 import AuthSocialButton from './AuthSocialButton';
 import { BsGithub, BsGoogle } from 'react-icons/bs';
+import axios from 'axios';
+import { redirect } from 'next/navigation';
 type Variant = 'REGISTER' | 'LOGIN';
 
 export default function AuthForm() {
@@ -20,7 +22,7 @@ export default function AuthForm() {
   }, [variant])
 
   const { register, handleSubmit, formState: {
-    errors
+    errors, isSubmitting
   } } = useForm<FieldValues>({
     defaultValues: {
       name: '',
@@ -29,10 +31,17 @@ export default function AuthForm() {
     }
   });
 
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     setIsLoading(true);
     if (variant === "REGISTER") {
-      // axios register
+      const response = await axios.post('/api/register', {
+        name: data?.name,
+        email: data?.email,
+        password: data?.password,
+      })
+      if (response?.status === 200) {
+        console.log("user created successfully");
+      }
     }
     if (variant === "LOGIN") {
       // next auth sign in 
@@ -51,32 +60,38 @@ export default function AuthForm() {
         <form
           className='space-y-6'
           onSubmit={handleSubmit(onSubmit)}>
-         { variant === "REGISTER" && (<Input id="name" type="text" label='Name' register={register} errors={errors} disabled={isLoading}/>)}
-         <Input id="email" label='Email' type="email" register={register} errors={errors} disabled={isLoading}/>
-         <Input id="password" label='Password' type="password" register={register} errors={errors} disabled={isLoading}/>
-         <div>
-        <Button disabled={isLoading} type="submit" fullWidth>{variant === "LOGIN" ?"Sign in":"Sign up"}</Button>
-      </div>
+          {variant === "REGISTER" && (<Input id="name" type="text" label='Name' register={register} errors={errors} disabled={isLoading} />)}
+          <Input id="email" label='Email' type="email" register={register} errors={errors} disabled={isLoading} />
+          <Input id="password" label='Password' type="password" register={register} errors={errors} disabled={isLoading} />
+          <div>
+            <Button disabled={isLoading} type="submit" fullWidth>{variant === "LOGIN" ? (
+              isSubmitting ? 'Login in...':"Sign in"
+            ) : (
+              <>
+                {isSubmitting ? "Registering..." : "Sign up"}
+              </>
+            )}</Button>
+          </div>
         </form>
         <div className='mt-6'>
           <div className="relative">
             <div className='absolute inset-0 flex items-center'>
-              <div className='w-full border-t border-gray-300'/>
+              <div className='w-full border-t border-gray-300' />
             </div>
             <div className='relative flex justify-center text-sm'>
               <span className='bg-white px-2 text-gray-500'>Or continue with</span>
             </div>
           </div>
           <div className='mt-6 flex gap-2'>
-            <AuthSocialButton icon={BsGithub} onClick={()=> socialAction('github')}/>
-            <AuthSocialButton icon={BsGoogle} onClick={()=> socialAction('google')}/>
+            <AuthSocialButton icon={BsGithub} onClick={() => socialAction('github')} />
+            <AuthSocialButton icon={BsGoogle} onClick={() => socialAction('google')} />
           </div>
         </div>
         <div className='flex gap-2 justify-center text-sm mt-6 px-2 text-gray-500'>
-          {variant === "REGISTER" ? "Already have an account?":"New to messenger?"}
-        <div className='underline cursor-pointer' onClick={toggleVariant}>
-          {variant === "LOGIN" ? "Create an account" : "Login"}
-        </div>
+          {variant === "REGISTER" ? "Already have an account?" : "New to messenger?"}
+          <div className='underline cursor-pointer' onClick={toggleVariant}>
+            {variant === "LOGIN" ? "Create an account" : "Login"}
+          </div>
         </div>
       </div>
     </div>
