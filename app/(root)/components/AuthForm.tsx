@@ -7,6 +7,8 @@ import AuthSocialButton from './AuthSocialButton';
 import { BsGithub, BsGoogle } from 'react-icons/bs';
 import axios from 'axios';
 import { redirect } from 'next/navigation';
+import toast from 'react-hot-toast';
+import { signIn } from 'next-auth/react';
 type Variant = 'REGISTER' | 'LOGIN';
 
 export default function AuthForm() {
@@ -34,17 +36,40 @@ export default function AuthForm() {
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     setIsLoading(true);
     if (variant === "REGISTER") {
-      const response = await axios.post('/api/register', {
-        name: data?.name,
-        email: data?.email,
-        password: data?.password,
-      })
-      if (response?.status === 200) {
-        console.log("user created successfully");
+      try{
+        const response = await axios.post('/api/register', {
+          name: data?.name,
+          email: data?.email,
+          password: data?.password,
+        })
+        if (response?.status === 200) {
+          toast.success("user created successfully");
+          setIsLoading(false);
+        }
+      }catch(error:any){
+        toast.error("something went wrong",error)
       }
     }
     if (variant === "LOGIN") {
-      // next auth sign in 
+     try{ 
+
+
+      const res = await signIn('credentials',{
+        email:data?.email,
+        password:data?.password,
+        redirect:false
+      })
+    
+
+      if(res?.ok && !res?.error){
+        toast.success('logged in successfully')
+      }
+      
+    }catch(error:any){
+      toast.error("error ",error);
+    }finally{
+       setIsLoading(false)
+     }
     }
 
   }

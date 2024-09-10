@@ -45,11 +45,23 @@ export const authOptions:AuthOptions = {
     })
     // ...add more providers here
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+  },
+  pages:{
+    signIn:'/'
+  },
   debug:process.env.NODE_ENV !== 'production',
   session:{
     strategy:'jwt'
   },
-  secret:process.env.NEXTAUTH_SECRET
+  secret:process.env.NEXTAUTH_SECRET,
+  
 }
 
 const handler= NextAuth(authOptions)
